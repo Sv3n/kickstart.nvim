@@ -90,8 +90,8 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
--- Set to true if you have a Nerd Font installed
-vim.g.have_nerd_font = false
+-- Set to true if you have a Nerd Font installed (for icons)
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -103,6 +103,9 @@ vim.opt.number = true
 -- You can also add relative line numbers, for help with jumping.
 --  Experiment for yourself to see if you like it!
 -- vim.opt.relativenumber = true
+
+-- Add ruler column
+vim.opt.colorcolumn = '80,120'
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -246,12 +249,15 @@ require('lazy').setup({
     'lewis6991/gitsigns.nvim',
     opts = {
       signs = {
-        add = { text = '+' },
-        change = { text = '~' },
+        add = { text = '|' },
+        change = { text = '|' },
         delete = { text = '_' },
         topdelete = { text = '‾' },
         changedelete = { text = '~' },
       },
+      current_line_blame = true,
+      numhl = true,
+      linehl = true,
     },
   },
 
@@ -283,6 +289,7 @@ require('lazy').setup({
         ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
         ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+        ['<leader>t'] = { name = '[T]erminal', _ = 'which_key_ignore' },
       }
     end,
   },
@@ -300,19 +307,23 @@ require('lazy').setup({
     branch = '0.1.x',
     dependencies = {
       'nvim-lua/plenary.nvim',
-      { -- If encountering errors, see telescope-fzf-native README for install instructions
+      {
         'nvim-telescope/telescope-fzf-native.nvim',
-
-        -- `build` is used to run some command when the plugin is installed/updated.
-        -- This is only run then, not every time Neovim starts up.
-        build = 'make',
-
-        -- `cond` is a condition used to determine whether this plugin should be
-        -- installed and loaded.
-        cond = function()
-          return vim.fn.executable 'make' == 1
-        end,
+        build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build',
       },
+      -- { -- If encountering errors, see telescope-fzf-native README for install instructions
+      --   'nvim-telescope/telescope-fzf-native.nvim',
+      --
+      --   -- `build` is used to run some command when the plugin is installed/updated.
+      --   -- This is only run then, not every time Neovim starts up.
+      --   build = 'make',
+      --
+      --   -- `cond` is a condition used to determine whether this plugin should be
+      --   -- installed and loaded.
+      --   cond = function()
+      --     return vim.fn.executable 'make' == 1
+      --   end,
+      -- },
       { 'nvim-telescope/telescope-ui-select.nvim' },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
@@ -349,6 +360,9 @@ require('lazy').setup({
         --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
         --   },
         -- },
+        defaults = {
+          path_display = { 'truncate' },
+        },
         -- pickers = {}
         extensions = {
           ['ui-select'] = {
@@ -366,6 +380,8 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
+      -- Add ctrl-P as alias for find_files
+      vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
@@ -544,6 +560,30 @@ require('lazy').setup({
         -- But for many setups, the LSP (`tsserver`) will work just fine
         -- tsserver = {},
         --
+        --
+        -- pylsp
+        pylsp = {
+          settings = {
+            pylsp = {
+              plugins = {
+                -- formatter options
+                black = { enabled = false },
+                autopep8 = { enabled = false },
+                yapf = { enabled = false },
+                -- linter options
+                pylint = { enabled = true, executable = 'pylint' },
+                pyflakes = { enabled = false },
+                pycodestyle = { enabled = false },
+                -- type checker
+                pylsp_mypy = { enabled = true },
+                -- auto-completion options
+                jedi_completion = { fuzzy = true },
+                -- import sorting
+                pyls_isort = { enabled = false },
+              },
+            },
+          },
+        },
 
         lua_ls = {
           -- cmd = {...},
@@ -586,6 +626,8 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format lua code
+        'pylint',
+        'python-lsp-server',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -614,6 +656,7 @@ require('lazy').setup({
       },
       formatters_by_ft = {
         lua = { 'stylua' },
+        python = {}, -- Selects no formatting(?)
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -784,7 +827,7 @@ require('lazy').setup({
 
       ---@diagnostic disable-next-line: missing-fields
       require('nvim-treesitter.configs').setup {
-        ensure_installed = { 'bash', 'c', 'html', 'lua', 'markdown', 'vim', 'vimdoc' },
+        ensure_installed = { 'bash', 'c', 'html', 'lua', 'markdown', 'vim', 'vimdoc', 'python' },
         -- Autoinstall languages that are not installed
         auto_install = true,
         highlight = { enable = true },
@@ -810,7 +853,7 @@ require('lazy').setup({
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.indent_line',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
@@ -839,6 +882,9 @@ require('lazy').setup({
     },
   },
 })
+
+-- Add a nushell terminal keymap
+vim.keymap.set('n', '<leader>t', '<cmd>vsplit term://nu <CR>i')
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
