@@ -517,6 +517,7 @@ require('lazy').setup({
           --
           -- When you move your cursor, the highlights will be cleared (the second autocommand).
           local client = vim.lsp.get_client_by_id(event.data.client_id)
+          -- print(vim.inspect(client.server_capabilities))
           if client and client.server_capabilities.documentHighlightProvider then
             vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
               buffer = event.buf,
@@ -885,6 +886,15 @@ require('lazy').setup({
 
 -- Add a nushell terminal keymap
 vim.keymap.set('n', '<leader>t', '<cmd>vsplit term://nu <CR>i')
+
+-- Get updated capabilities (extra completions support) and start vhdl_ls
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+local cfg = {
+  capabilities = capabilities
+}
+-- print(vim.inspect(cfg))
+require'lspconfig'.vhdl_ls.setup{cfg}
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
