@@ -82,7 +82,11 @@ I hope you enjoy your Neovim journey,
 - TJ
 
 P.S. You can delete this when you're done too. It's your config now! :)
---]]
+i--]]
+
+-- External tools:
+--  https://github.com/sharkdp/fd:         winget install sharkdp.fd
+--  https://github.com/BurntSushi/ripgrep  winget install BurntSushi.ripgrep.MSVC
 
 -- Set <space> as the leader key
 -- See `:help mapleader`
@@ -260,7 +264,7 @@ require('lazy').setup({
       },
       current_line_blame = true,
       numhl = true,
-      linehl = true,
+      linehl = false,
     },
   },
 
@@ -398,6 +402,7 @@ require('lazy').setup({
         -- You can pass additional configuration to telescope to change theme, layout, etc.
         builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
           winblend = 10,
+          width = 0.7,
           previewer = false,
         })
       end, { desc = '[/] Fuzzily search in current buffer' })
@@ -583,11 +588,12 @@ require('lazy').setup({
                 pyflakes = { enabled = false },
                 pycodestyle = { enabled = false },
                 -- type checker
-                pylsp_mypy = { enabled = true },
+                pylsp_mypy = { enabled = false },
                 -- auto-completion options
                 jedi_completion = { fuzzy = true },
                 -- import sorting
                 pyls_isort = { enabled = false },
+                ruff = { enabled = false },
               },
             },
           },
@@ -621,6 +627,7 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
+        'mypy',
         'stylua', -- Used to format lua code
         'pylint',
         'python-lsp-server',
@@ -785,7 +792,7 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd.colorscheme 'tokyonight-moon'
 
       -- You can configure highlights by doing something like
       vim.cmd.hi 'Comment gui=none'
@@ -864,6 +871,24 @@ require('lazy').setup({
     end,
   },
 
+  -- Neogit, for in-editor commits and quick diffs
+  {
+    'NeogitOrg/neogit',
+    dependencies = {
+      'nvim-lua/plenary.nvim', -- required
+      'sindrets/diffview.nvim', -- optional - Diff integration
+
+      -- Only one of these is needed, not both.
+      'nvim-telescope/telescope.nvim', -- optional
+      -- 'ibhagwan/fzf-lua', -- optional
+    },
+    config = true,
+  },
+  -- Multi-cursor
+  {
+    'mg979/vim-visual-multi',
+  },
+
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- put them in the right spots if you want.
@@ -911,10 +936,10 @@ vim.keymap.set('n', '<leader>t', '<cmd>vsplit term://nu <CR>i')
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 local cfg = {
-  capabilities = capabilities
+  capabilities = capabilities,
 }
 -- print(vim.inspect(cfg))
-require'lspconfig'.vhdl_ls.setup{cfg}
+require('lspconfig').vhdl_ls.setup { cfg }
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
