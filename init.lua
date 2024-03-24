@@ -363,6 +363,11 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sn', function()
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = '[S]earch [N]eovim files' })
+
+      -- Shortcut for searching local dir
+      vim.keymap.set('n', '<leader>sc', function()
+        builtin.find_files { cwd = vim.fs.dirname(vim.api.nvim_buf_get_name(0)) }
+      end, { desc = '[S]earch [C]lose files' })
     end,
   },
 
@@ -722,7 +727,7 @@ require('lazy').setup({
       }
     end,
   },
-
+  { 'ellisonleao/gruvbox.nvim', priority = 1000, config = true },
   { -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
     -- change the command in the config to whatever the name of that colorscheme is
@@ -734,7 +739,7 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'slate'
+      vim.cmd.colorscheme 'gruvbox'
 
       -- You can configure highlights by doing something like
       vim.cmd.hi 'Comment gui=none'
@@ -840,7 +845,7 @@ require('lazy').setup({
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {
   ui = {
     -- If you have a Nerd Font, set icons to an empty table which will use the
@@ -865,6 +870,8 @@ require('lazy').setup({
 
 -- Add a nushell terminal keymap
 vim.keymap.set('n', '<leader>t', '<cmd>vsplit term://nu <CR>i')
+vim.keymap.set('n', 'qq', '<cmd>bd<CR>')
+vim.keymap.set('n', '<leader>g', '<cmd>Neogit<cr>')
 
 -- Get updated capabilities (extra completions support) and start vhdl_ls
 local capabilities = vim.lsp.protocol.make_client_capabilities()
