@@ -240,6 +240,9 @@ require('lazy').setup({
         ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
         ['<leader>t'] = { name = '[T]erminal', _ = 'which_key_ignore' },
+        ['<leader>a'] = { name = 'H[A]rpoon add', _ = 'which_key_ignore' },
+        ['<leader>x'] = { name = '[X]trouble', _ = 'which_key_ignore' },
+        ['<leader>g'] = { name = 'Neo[G]it', _ = 'which_key_ignore' },
       }
     end,
   },
@@ -869,8 +872,8 @@ require('lazy').setup({
 })
 
 -- Add a nushell terminal keymap
-vim.keymap.set('n', '<leader>t', '<cmd>vsplit term://nu <CR>i')
-vim.keymap.set('n', 'qq', '<cmd>bd<CR>')
+vim.keymap.set('n', '<leader>t', '<cmd>vsplit term://nu <CR>i', { desc = 'Open terminal in cwd' })
+vim.keymap.set('n', 'qq', '<cmd>bd<CR>', { desc = 'Close active buffer' })
 vim.keymap.set('n', '<leader>g', '<cmd>Neogit<cr>')
 
 -- Get updated capabilities (extra completions support) and start vhdl_ls
