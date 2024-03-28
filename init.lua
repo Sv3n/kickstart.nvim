@@ -92,7 +92,7 @@ vim.opt.splitbelow = true
 --  See `:help 'list'`
 --  and `:help 'listchars'`
 vim.opt.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.opt.listchars = { tab = '» ', trail = '·', lead = '.', nbsp = '␣' }
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
@@ -334,6 +334,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
       -- Add ctrl-P as alias for find_files
+      -- TODO play with no_ignore and hidden options
       vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
@@ -342,6 +343,8 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+
+      -- TODO: have a look at https://github.com/nvim-telescope/telescope.nvim/issues/621
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -872,7 +875,7 @@ require('lazy').setup({
 })
 
 -- Add a nushell terminal keymap
-vim.keymap.set('n', '<leader>t', '<cmd>vsplit term://nu <CR>i', { desc = 'Open terminal in cwd' })
+vim.keymap.set('n', '<leader>t', '<cmd>vsplit term://nu <CR><cmd>setlocal nonumber norelativenumber <cr>i', { desc = 'Open terminal in cwd' })
 vim.keymap.set('n', 'qq', '<cmd>bd<CR>', { desc = 'Close active buffer' })
 vim.keymap.set('n', '<leader>g', '<cmd>Neogit<cr>')
 
@@ -884,6 +887,18 @@ local cfg = {
 }
 -- print(vim.inspect(cfg))
 require('lspconfig').vhdl_ls.setup { cfg }
+
+-- Indent port maps with single indent
+vim.g.vhdl_indent_genportmap = 0
+-- Indent assignments with single indent
+vim.g.vhdl_indent_rhsassign = 0
+
+vim.keymap.set('n', '<A-j>', ':m .+1<CR>==')
+vim.keymap.set('n', '<A-k>', ':m .-2<CR>==')
+-- inoremap <A-j> <Esc>:m .+1<CR>==gi
+-- inoremap <A-k> <Esc>:m .-2<CR>==gi
+-- vnoremap <A-j> :m '>+1<CR>gv=gv
+-- vnoremap <A-k> :m '<-2<CR>gv=gv
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
